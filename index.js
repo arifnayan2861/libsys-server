@@ -55,6 +55,14 @@ async function run() {
       const result = await booksCollection.insertOne(book);
       res.send(result);
     });
+
+    //get books by category
+    app.get("/books/:category", async (req, res) => {
+      const bookCategory = req.params.category;
+      const query = { category: bookCategory };
+      const result = await booksCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
   }
 }
