@@ -40,10 +40,19 @@ async function run() {
     );
 
     const usersCollection = client.db("LibSysDB").collection("users");
+    const booksCollection = client.db("LibSysDB").collection("books");
 
+    //user added to db
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    //add-books api
+    app.post("/add-book", async (req, res) => {
+      const book = req.body;
+      const result = await booksCollection.insertOne(book);
       res.send(result);
     });
   } finally {
