@@ -101,6 +101,34 @@ async function run() {
         console.error(error);
       }
     });
+
+    app.get("/borrowed-books/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await borrowedBooksCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete("/borrowed-books/:email/:id", async (req, res) => {
+      const email = req.params.email;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const query = { userEmail: email, bookId: id };
+      const result = await borrowedBooksCollection.deleteOne(query);
+
+      const update = {
+        $inc: { quantity: 1 },
+      };
+
+      const updateResult = await booksCollection.updateOne(
+        filter,
+        update,
+        options
+      );
+
+      res.send(result);
+    });
   } finally {
   }
 }
