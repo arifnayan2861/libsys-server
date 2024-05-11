@@ -41,6 +41,9 @@ async function run() {
 
     const usersCollection = client.db("LibSysDB").collection("users");
     const booksCollection = client.db("LibSysDB").collection("books");
+    const borrowedBooksCollection = client
+      .db("LibSysDB")
+      .collection("borrowed-books");
 
     //user added to db
     app.post("/users", async (req, res) => {
@@ -70,6 +73,33 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await booksCollection.findOne(query);
       res.send(result);
+    });
+
+    //update book count and store borrowed books
+    app.put("/book/:id/borrow", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const book = req.body;
+
+      const update = {
+        $inc: { quantity: -1 },
+      };
+
+      try {
+        const updateResult = await booksCollection.updateOne(
+          filter,
+          update,
+          options
+        );
+        if (updateResult.modifiedCount > 0) {
+          const borrowResult = await borrowedBooksCollection.insertOne(book);
+        } else {
+          res.status(400).send("Book not found or quantity already 0"); // Error handling
+        }
+      } catch (error) {
+        console.error(error);
+      }
     });
   } finally {
   }
