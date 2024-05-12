@@ -190,6 +190,13 @@ async function run() {
       const result = await booksCollection.updateOne(filter, book, options);
       res.send(result);
     });
+
+    app.get("/filtered-books", async (req, res) => {
+      const cursor = booksCollection.find({ quantity: { $gt: 0 } }); // Filter by quantity > 0
+      const result = await cursor.toArray();
+      console.log("token owner", req.user);
+      res.send(result);
+    });
   } finally {
   }
 }
