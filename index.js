@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const port = process.env.PORT || 5000;
@@ -33,6 +34,21 @@ const client = new MongoClient(uri, {
   },
 });
 
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies.token;
+  // console.log("middleware", token);
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+    if (error) {
+      return res.status(401).send({ message: "Unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
 async function run() {
   try {
     console.log(
@@ -45,6 +61,16 @@ async function run() {
       .db("LibSysDB")
       .collection("borrowed-books");
 
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log("backend token", user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "3h",
+      });
+      res.cookie("token", token, cookieOptions);
+      res.send({ success: true });
+    });
+
     //user added to db
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -52,10 +78,19 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("logout", user);
+      res
+        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
+        .send({ success: true });
+    });
+
     //add-books api
-    app.post("/add-book", async (req, res) => {
+    app.post("/add-book", verifyToken, async (req, res) => {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
+      console.log(req.user);
       res.send(result);
     });
 
@@ -131,9 +166,10 @@ async function run() {
     });
 
     //get all books
-    app.get("/all-books", async (req, res) => {
+    app.get("/all-books", verifyToken, async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
+      console.log("token owner", req.user);
       res.send(result);
     });
 
