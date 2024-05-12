@@ -129,6 +129,31 @@ async function run() {
 
       res.send(result);
     });
+
+    //get all books
+    app.get("/all-books", async (req, res) => {
+      const cursor = booksCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.put("/update-book/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedBook = req.body;
+      const book = {
+        $set: {
+          img: updatedBook.img,
+          bookName: updatedBook.bookName,
+          authorName: updatedBook.authorName,
+          category: updatedBook.category,
+          rating: updatedBook.rating,
+        },
+      };
+      const result = await booksCollection.updateOne(filter, book, options);
+      res.send(result);
+    });
   } finally {
   }
 }
