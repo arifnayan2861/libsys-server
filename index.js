@@ -63,7 +63,7 @@ async function run() {
 
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log("backend token", user);
+      // console.log("backend token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "3h",
       });
@@ -111,7 +111,7 @@ async function run() {
     });
 
     //update book count and store borrowed books
-    app.put("/book/:id/borrow", async (req, res) => {
+    app.put("/book/borrow/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
@@ -194,7 +194,7 @@ async function run() {
     app.get("/filtered-books", async (req, res) => {
       const cursor = booksCollection.find({ quantity: { $gt: 0 } }); // Filter by quantity > 0
       const result = await cursor.toArray();
-      console.log("token owner", req.user);
+      // console.log("token owner", req.user);
       res.send(result);
     });
   } finally {
