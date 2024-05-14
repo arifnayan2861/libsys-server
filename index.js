@@ -17,7 +17,11 @@ const cookieOptions = {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "https://libsys-7ee11.web.app",
+      "https://libsys-7ee11.firebaseapp.com",
+      "http://localhost:5173",
+    ],
     credentials: true,
   })
 );
