@@ -55,9 +55,9 @@ const verifyToken = (req, res, next) => {
 
 async function run() {
   try {
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
 
     const usersCollection = client.db("LibSysDB").collection("users");
     const booksCollection = client.db("LibSysDB").collection("books");
@@ -84,7 +84,7 @@ async function run() {
 
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      console.log("logout", user);
+      // console.log("logout", user);
       res
         .clearCookie("token", { ...cookieOptions, maxAge: 0 })
         .send({ success: true });
@@ -94,7 +94,7 @@ async function run() {
     app.post("/add-book", verifyToken, async (req, res) => {
       const book = req.body;
       const result = await booksCollection.insertOne(book);
-      console.log(req.user);
+      // console.log(req.user);
       res.send(result);
     });
 
@@ -173,7 +173,7 @@ async function run() {
     app.get("/all-books", verifyToken, async (req, res) => {
       const cursor = booksCollection.find();
       const result = await cursor.toArray();
-      console.log("token owner", req.user);
+      // console.log("token owner", req.user);
       res.send(result);
     });
 
@@ -199,6 +199,20 @@ async function run() {
       const cursor = booksCollection.find({ quantity: { $gt: 0 } }); // Filter by quantity > 0
       const result = await cursor.toArray();
       // console.log("token owner", req.user);
+      res.send(result);
+    });
+
+    app.get("/all-users", async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      // console.log("token owner", req.user);
+      res.send(result);
+    });
+
+    app.get("/current-user/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const query = { email: userEmail };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     });
   } finally {
