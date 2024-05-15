@@ -18,6 +18,7 @@ const cookieOptions = {
 app.use(
   cors({
     origin: [
+      "https://libsys.netlify.app",
       "https://libsys-7ee11.web.app",
       "https://libsys-7ee11.firebaseapp.com",
       "http://localhost:5173",
